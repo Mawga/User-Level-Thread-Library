@@ -6,7 +6,7 @@ This user level thread library implementation uses non-local gotos via jmp_buf, 
 A struct ThreadControlBlock is created to hold information about the threads while a class Schedule manages the ThreadControlBlocks.
 
 Currently there is no thread synchronization which will be implemented shortly.
-# thread_control_block.cc
+## thread_control_block.cc
 Implements a struct ThreadControlBlock which holds information about a thread.
 
 	int status:
@@ -21,7 +21,7 @@ Implements a struct ThreadControlBlock which holds information about a thread.
 	int *stack_ptr:
 		A stack_ptr pointing to a memory block (int [8191]).
 
-# schedule.cc
+## schedule.cc
 Implements Schedule class, a singly linked list with member functions that allow it to act as a queue.
 A struct Node is defined within the class which holds the value of a ThreadControlBlock pointer.
 The Schedule contains member variables pointing to the first and last node.
@@ -45,7 +45,7 @@ It also contains a pthread_t variable curr_thread_id_ that is assigned to a push
 	
 pop(), push(), empty() are pretty self explanatory.
 
-# thread.cc
+## thread.cc
 	int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_attr,
 		void *(*start_routine)(void*), void *restrict_arg):
 		Creates a new ThreadControlBlock pointer and pushes restrict_arg and the address to pthread_exit onto the block's stack (8190 and 8189 respectively).
@@ -72,10 +72,10 @@ pop(), push(), empty() are pretty self explanatory.
 	void schedule_handler(int signum):
 		Sets the jump_buffer of the current thread, calls update_first(), and longjmps to the next thread on Schedule (now at the front).
 
-# threads.cc
+## threads.cc
 Unity file includes thread.cc, schedule.cc, and thread_control_block.cc for makefile to create threads.o
 
-# Issues that I ran into
+## Issues that I ran into
 Not having a clear understanding of jmp_buf and set_jmp:
 The man pages helped me as well as: http://www.csl.mtu.edu/cs4411.ck/www/NOTES/non-local-goto/goto.html
 
@@ -85,6 +85,6 @@ Reviewed the call stack.
 Not returning correct values on pthread_self and when printing &thread:
 Changed the ThreadControlBlock's thread_id to a pointer value which uses the pthread_t* input.
     
-# TODO
+## TODO
 Implement thread synchronization
 
