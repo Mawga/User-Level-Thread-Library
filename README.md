@@ -73,7 +73,7 @@ pop(), push(), empty() are pretty self explanatory.
 		Sets the jump_buffer of the current thread, calls update_first(), and longjmps to the next thread on Schedule (now at the front).
 
 # threads.cc
-	Unity file includes thread.cc, schedule.cc, and thread_control_block.cc for makefile to create threads.o
+Unity file includes thread.cc, schedule.cc, and thread_control_block.cc for makefile to create threads.o
 
 # Issues that I ran into
 Not having a clear understanding of jmp_buf and set_jmp:
