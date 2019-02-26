@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <unistd.h>
+#include <cstdint>
 #include "schedule.h"
 
 bool scheduling = false;

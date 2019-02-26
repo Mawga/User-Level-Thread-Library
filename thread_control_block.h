@@ -16,7 +16,7 @@ struct ThreadControlBlock {
         int status;
 	pthread_t *thread_id;
 	jmp_buf jump_buffer;
-	int *stack_ptr;
+	char *stack_ptr;
 
 	// Status of threads.
 	const int kReady = 0;
