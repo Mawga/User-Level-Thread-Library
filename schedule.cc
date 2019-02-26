@@ -28,7 +28,6 @@ void Schedule::push(ThreadControlBlock *thread_control_block, pthread_t *restric
 	*(thread_control_block->thread_id) = current_thread_id_++;
 
 	if (!node) {
-		perror("ERROR:");
 		exit(errno);
 	}
 	node->value = thread_control_block;
@@ -43,7 +42,6 @@ void Schedule::push(ThreadControlBlock *thread_control_block, pthread_t *restric
 
 void Schedule::update_first() {
 	if (!(this->first_)) {
-                perror("Attempt to next on empty Schedule:");
                 exit(1);
         }
 	
@@ -63,7 +61,6 @@ void Schedule::update_first() {
 
 void Schedule::pop() {
 	if (!(this->first_)) {
-		perror("Popped on empty Schedule:");
 		exit(1);
 	}
 	// When popping with only one element in the Schedule set first_ and last_ to nullptr.
@@ -83,7 +80,6 @@ bool Schedule::empty() {
 
 ThreadControlBlock *Schedule::front() {
 	if (!(this->first_)) {
-		perror("Accessed front on empty Schedule:");
 		exit(1);
 	}
 	return this->first_->value;

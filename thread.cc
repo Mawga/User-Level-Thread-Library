@@ -26,7 +26,7 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 	
 	// Set up the stack for the newly created ThreadControlBlock.
 	int *ptr = thread_control_block->stack_ptr;
-	ptr[8190] = (int)&restrict_arg;
+	ptr[8190] = (int)restrict_arg;
 	ptr[8189] = (int)&pthread_exit; // Push the address for pthread_exit on the space below so the thread returns to pthread_exit.
 
 	// Set up the newly created ThreadControlBlock's jmp_buf so it can run start_routine and exit to pthread_create.
