@@ -3,6 +3,34 @@
 
 #include "thread.h"
 
+void init() {
+	scheduling = true;
+	ThreadControlBlock *thread_control_block = new ThreadControlBlock();
+	thread_control_block->status = thread_control_block->kRunning;
+	sched.push(thread_control_block, nullptr);
+	
+	struct sigaction timeout;
+	timeout.sa_handler = schedule_handler;
+	sigemptyset(&timeout.sa_mask);
+	timeout.sa_flags = SA_NODEFER | SA_RESTART; // SA_NODEFER is chosen to prevent signals from blocking within the handler.
+	if (sigaction(SIGALRM, &timeout, NULL) == -1) {
+		exit(errno);
+	}
+
+	sigemptyset(&alarm_set);
+	sigaddset(&alarm_set, SIGALRM);
+
+	ualarm(50000, 50000); // Start a 50 ms timer for priority scheduling.
+}
+
+void lock() {
+	sigprocmask(SIG_BLOCK, &alarm_set, NULL);
+}
+
+void unlock() {
+	sigprocmask(SIG_UNBLOCK, &alarm_set, NULL);
+}
+
 void schedule_handler(int signum) {
 	ThreadControlBlock *thread_control_block = sched.front();
         if (!setjmp(thread_control_block->jump_buffer)) { // If this thread has been longjmped to it will not run this block.
@@ -22,6 +50,7 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 	if (!scheduling) { // If this is the first thread to be created then create and push aThreadControlBlock for main then start timer.
 		init();
 	}
+	lock();
 	ThreadControlBlock *thread_control_block = new ThreadControlBlock();
 	
 	// Set up the stack for the newly created ThreadControlBlock.
@@ -37,24 +66,13 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 	thread_control_block->jump_buffer[0].__jmpbuf[thread_control_block->kJumpBufProgCounter] = 
 		ptr_mangle((uintptr_t)start_routine);
 	sched.push(thread_control_block, restrict_thread);
+
+	unlock();
 	return *(restrict_thread);
 }
 
-void init() {
-	scheduling = true;
-	ThreadControlBlock *thread_control_block = new ThreadControlBlock();
-	thread_control_block->status = thread_control_block->kRunning;
-	sched.push(thread_control_block, nullptr);
-	
-	struct sigaction timeout;
-	timeout.sa_handler = schedule_handler;
-	sigemptyset(&timeout.sa_mask);
-	timeout.sa_flags = SA_NODEFER | SA_RESTART; // SA_NODEFER is chosen to prevent signals from blocking within the handler.
-	if (sigaction(SIGALRM, &timeout, NULL) == -1) {
-		perror("ERROR:");
-		exit(errno);
-	}
-	ualarm(50000, 50000); // Start a 50 ms timer for priority scheduling.
+int pthread_join(pthread_t thread, void **value_ptr) {
+	return 0;	
 }
 
 void pthread_exit(void *value_ptr) {

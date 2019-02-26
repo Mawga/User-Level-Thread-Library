@@ -13,9 +13,17 @@
 bool scheduling = false;
 Schedule sched;
 
+sigset_t alarm_set;
+
 // Create ThreadControlBlock pointer for main and push onto the Schedule.
 // Begin a timer for priority scheduling.
 void init();
+
+// Blocks SIGALRM.
+void lock();
+
+// Unblocks SIGALRM.
+void unlock();
 
 // Create a new ThreadControlBlock and push it onto the Schedule.
 int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_attr,
