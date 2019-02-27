@@ -32,10 +32,12 @@ void unlock() {
 }
 
 void schedule_handler(int signum) {
+	lock();
 	ThreadControlBlock *thread_control_block = sched.front();
         if (!setjmp(thread_control_block->jump_buffer)) { // If this thread has been longjmped to it will not run this block.
 				// Move the first thread to back of schedule and jump to next thread.
-                sched.update_first();
+                sched.schedule_next();
+		unlock();
                 longjmp(sched.front()->jump_buffer, 1);
         }
 }
@@ -75,12 +77,30 @@ int pthread_join(pthread_t thread, void **value_ptr) {
 	return 0;	
 }
 
+void pthread_exit_wrapper() {
+  unsigned int res;
+  asm("movl %%eax, %0\n":"=r"(res)); 
+  pthread_exit((void *) res);
+}
+
 void pthread_exit(void *value_ptr) {
-	if (sched.front()->thread_id != 0) {
-		sched.pop();
+	lock();
+
+	if (*(sched.front()->thread_id) != 0) {
 		ThreadControlBlock *thread_control_block = sched.front();
-                longjmp(thread_control_block->jump_buffer, 1);
+		thread_control_block->status = thread_control_block->kExited;
+		unlock();
+		kill(getpid(), SIGALRM);
         }
+	else {
+		while (1) {
+			if (sched.check_threads_exited()) exit(0);
+			unlock();
+			kill(getpid(), SIGALRM);
+			lock();
+		}
+
+	}
 	exit(0);
 }
 

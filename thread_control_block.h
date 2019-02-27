@@ -22,6 +22,7 @@ struct ThreadControlBlock {
 	const int kReady = 0;
 	const int kRunning = 1;
 	const int kExited = 2;
+	const int kBlockedJoin = 3;
 
 	// Indicies to jmp_buf's stack pointer and program counter.
 	const int kJumpBufStackPtr = 4;

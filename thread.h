@@ -29,6 +29,11 @@ void unlock();
 int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_attr,
 		void *(*start_routine)(void*), void *restrict_arg);
 
+int pthread_join(pthread_t thread, void **value_ptr);
+
+// Passes return value of exiting pthread to pthread_exit as value_ptr.
+void pthread_exit_wrapper();
+
 // If the current thread (the front of the Schedule) is the one created for main, exit program.
 // Otherwise run the next thread in the Schedule.
 void pthread_exit(void *value_ptr);

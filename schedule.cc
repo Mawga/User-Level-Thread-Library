@@ -55,8 +55,25 @@ void Schedule::update_first() {
 
 	this->last_->next = node;
 	this->last_ = node;
-	node->value->status = node->value->kReady;
-	this->first_->value->status = this->first_->value->kRunning;
+	if (node->value->status == node->value->kRunning) node->value->status = node->value->kReady;
+	if (this->first_->value->status == this->first_->value->kReady) this->first_->value->status = this->first_->value->kRunning;
+}
+
+void Schedule::schedule_next() {
+	Schedule::update_first();
+	while (this->first_->value->status != this->first_->value->kRunning) {
+		Node *node = this->first_;
+		if (node->value->status == node->value->kExited) Schedule::update_first();
+	}
+}
+
+bool Schedule::check_threads_exited() {
+	Node *node = this->first_->next; // Don't check main thread's kRunning status.
+	while (node != nullptr) {
+		if (node->value->status != node->value->kExited) return false;
+		node = node->next;
+	}
+	return true;
 }
 
 void Schedule::pop() {
