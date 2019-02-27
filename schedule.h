@@ -1,5 +1,5 @@
 // Maga Kim
-// 11 February 2019
+// 26 February 2019
 
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
@@ -18,7 +18,6 @@ class Schedule {
 		void update_first(); // Move the first element to the back.
 		void schedule_next(); // update_first() until element in front has status kReady.
 		bool check_threads_exited(); // For main thread to exit only after all other threads have exited.
-		bool empty();
 		ThreadControlBlock *get_join_thread(pthread_t join_on_thread_id);
 		ThreadControlBlock *front();
 	private:

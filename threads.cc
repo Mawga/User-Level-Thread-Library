@@ -4,3 +4,5 @@
 #include "thread_control_block.cc"
 #include "schedule.cc"
 #include "thread.cc"
+#include "semaphore.cc"
+#include "semaphore_queue.cc"

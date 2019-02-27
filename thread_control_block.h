@@ -1,5 +1,5 @@
 // Maga Kim
-// 11 February 2019
+// 26 February 2019
 
 #ifndef THREAD_CONTROL_BLOCK_H
 #define THREAD_CONTROL_BLOCK_H
@@ -7,7 +7,6 @@
 #include "setjmp.h"
 #include <cstdlib>
 
-// #define STACK_SIZE 32767;
 // #define MAX_NUM_THREADS 128;
 
 struct ThreadControlBlock {

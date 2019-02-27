@@ -1,5 +1,5 @@
 // Maga Kim
-// 11 February 2019
+// 26 February 2019
 
 #include "thread.h"
 
@@ -71,7 +71,6 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 
 	unlock();
 	return 0;
-	//return *(restrict_thread);
 }
 
 int pthread_join(pthread_t thread, void **value_ptr) {

@@ -1,5 +1,5 @@
 // Maga Kim
-// 11 February 2019
+// 26 February 2019
 
 #ifndef THREAD_H
 #define THREAD_H
