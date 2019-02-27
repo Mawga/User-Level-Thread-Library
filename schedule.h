@@ -19,6 +19,7 @@ class Schedule {
 		void schedule_next(); // update_first() until element in front has status kReady.
 		bool check_threads_exited(); // For main thread to exit only after all other threads have exited.
 		bool empty();
+		ThreadControlBlock *get_join_thread(pthread_t join_on_thread_id);
 		ThreadControlBlock *front();
 	private:
 		struct Node {

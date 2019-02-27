@@ -15,6 +15,8 @@ struct ThreadControlBlock {
         ~ThreadControlBlock();
         int status;
 	pthread_t *thread_id;
+	pthread_t join_on_thread_id;
+	void *return_value;
 	jmp_buf jump_buffer;
 	char *stack_ptr;
 
@@ -23,6 +25,7 @@ struct ThreadControlBlock {
 	const int kRunning = 1;
 	const int kExited = 2;
 	const int kBlockedJoin = 3;
+	const int kZombie = 4;
 
 	// Indicies to jmp_buf's stack pointer and program counter.
 	const int kJumpBufStackPtr = 4;

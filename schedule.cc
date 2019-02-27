@@ -62,15 +62,40 @@ void Schedule::update_first() {
 void Schedule::schedule_next() {
 	Schedule::update_first();
 	while (this->first_->value->status != this->first_->value->kRunning) {
-		Node *node = this->first_;
-		if (node->value->status == node->value->kExited) Schedule::update_first();
+		ThreadControlBlock *thread = this->first_->value;
+		if (thread->status == thread->kExited) {
+			Schedule::update_first();
+		}
+		else if (thread->status == thread->kZombie) {
+			Schedule::pop();
+		}
+		else if (thread->status == thread->kBlockedJoin) {
+			ThreadControlBlock *join_on_thread = get_join_thread(thread->join_on_thread_id);
+			if (!join_on_thread) exit(1);
+			if (join_on_thread->status == join_on_thread->kExited) {
+				join_on_thread->status = join_on_thread->kZombie;
+				thread->status = thread->kRunning;
+				thread->return_value = join_on_thread->return_value;
+			}
+			else {
+				Schedule::update_first();
+			}
+		}
 	}
 }
 
+ThreadControlBlock *Schedule::get_join_thread(pthread_t join_on_thread_id) {
+	Node *node = this->first_->next;
+	while (node != nullptr) {
+		if (*(node->value->thread_id) == join_on_thread_id) return node->value;
+		node = node->next;
+	}
+	return nullptr;
+}
 bool Schedule::check_threads_exited() {
 	Node *node = this->first_->next; // Don't check main thread's kRunning status.
 	while (node != nullptr) {
-		if (node->value->status != node->value->kExited) return false;
+		if (node->value->status != node->value->kExited && node->value->status != node->value->kZombie) return false;
 		node = node->next;
 	}
 	return true;

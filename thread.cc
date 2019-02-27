@@ -32,12 +32,12 @@ void unlock() {
 }
 
 void schedule_handler(int signum) {
-	lock();
+	ualarm(0, 0);
 	ThreadControlBlock *thread_control_block = sched.front();
         if (!setjmp(thread_control_block->jump_buffer)) { // If this thread has been longjmped to it will not run this block.
 				// Move the first thread to back of schedule and jump to next thread.
                 sched.schedule_next();
-		unlock();
+		ualarm(50000, 50000);
                 longjmp(sched.front()->jump_buffer, 1);
         }
 }
@@ -58,7 +58,7 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 	// Set up the stack for the newly created ThreadControlBlock.
 	char *ptr = thread_control_block->stack_ptr;
 	*(int*)(ptr+32763) = (int)restrict_arg;
-	*(int*)(ptr+32759) = (int)pthread_exit; // Push the address for pthread_exit on the space below so the thread returns to pthread_exit.
+	*(int*)(ptr+32759) = (int)pthread_exit_wrapper; // Push the address for pthread_exit on the space below so the thread returns to pthread_exit.
 
 	// Set up the newly created ThreadControlBlock's jmp_buf so it can run start_routine and exit to pthread_create.
 	setjmp(thread_control_block->jump_buffer);
@@ -74,6 +74,13 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 }
 
 int pthread_join(pthread_t thread, void **value_ptr) {
+	lock();
+	sched.front()->join_on_thread_id = thread;
+	sched.front()->status = sched.front()->kBlockedJoin;
+	unlock();
+	kill(getpid(), SIGALRM);
+	*value_ptr = sched.front()->return_value;
+	sched.front()->return_value = nullptr;
 	return 0;	
 }
 
@@ -87,8 +94,8 @@ void pthread_exit(void *value_ptr) {
 	lock();
 
 	if (*(sched.front()->thread_id) != 0) {
-		ThreadControlBlock *thread_control_block = sched.front();
-		thread_control_block->status = thread_control_block->kExited;
+		sched.front()->status = sched.front()->kExited;
+		sched.front()->return_value = value_ptr;
 		unlock();
 		kill(getpid(), SIGALRM);
         }
