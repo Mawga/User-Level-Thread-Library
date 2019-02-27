@@ -55,15 +55,18 @@ void Schedule::update_first() {
 
 	this->last_->next = node;
 	this->last_ = node;
+	
 	if (node->value->status == node->value->kRunning) node->value->status = node->value->kReady;
-	if (this->first_->value->status == this->first_->value->kReady) this->first_->value->status = this->first_->value->kRunning;
 }
 
 void Schedule::schedule_next() {
 	Schedule::update_first();
 	while (this->first_->value->status != this->first_->value->kRunning) {
 		ThreadControlBlock *thread = this->first_->value;
-		if (thread->status == thread->kExited) {
+		if (thread->status == thread->kReady) {
+			thread->status = thread->kRunning;
+		}
+		if (thread->status == thread->kExited || thread->status == thread->kWaiting) {
 			Schedule::update_first();
 		}
 		else if (thread->status == thread->kZombie) {
@@ -71,7 +74,6 @@ void Schedule::schedule_next() {
 		}
 		else if (thread->status == thread->kBlockedJoin) {
 			ThreadControlBlock *join_on_thread = get_join_thread(thread->join_on_thread_id);
-			if (!join_on_thread) exit(1);
 			if (join_on_thread->status == join_on_thread->kExited) {
 				join_on_thread->status = join_on_thread->kZombie;
 				thread->status = thread->kRunning;

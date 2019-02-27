@@ -32,12 +32,12 @@ void unlock() {
 }
 
 void schedule_handler(int signum) {
-	ualarm(0, 0);
+	lock();
 	ThreadControlBlock *thread_control_block = sched.front();
         if (!setjmp(thread_control_block->jump_buffer)) { // If this thread has been longjmped to it will not run this block.
 				// Move the first thread to back of schedule and jump to next thread.
                 sched.schedule_next();
-		ualarm(50000, 50000);
+		unlock();
                 longjmp(sched.front()->jump_buffer, 1);
         }
 }
@@ -70,17 +70,26 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 	sched.push(thread_control_block, restrict_thread);
 
 	unlock();
-	return *(restrict_thread);
+	return 0;
+	//return *(restrict_thread);
 }
 
 int pthread_join(pthread_t thread, void **value_ptr) {
 	lock();
+	ThreadControlBlock *join_thread = sched.get_join_thread(thread);
+	if (!join_thread) {
+		errno = ESRCH;
+		return -1;
+	}
 	sched.front()->join_on_thread_id = thread;
 	sched.front()->status = sched.front()->kBlockedJoin;
 	unlock();
+
 	kill(getpid(), SIGALRM);
+	lock();
 	*value_ptr = sched.front()->return_value;
 	sched.front()->return_value = nullptr;
+	unlock();
 	return 0;	
 }
 
