@@ -75,16 +75,25 @@ int pthread_create(pthread_t *restrict_thread, const pthread_attr_t *restrict_at
 
 int pthread_join(pthread_t thread, void **value_ptr) {
 	lock();
-	ThreadControlBlock *join_thread = sched.get_join_thread(thread);
-	if (!join_thread) {
+	ThreadControlBlock *join_on_thread = sched.get_join_thread(thread);
+	if (!join_on_thread) {
 		errno = ESRCH;
 		return -1;
 	}
+
+	if (join_on_thread->status == join_on_thread->kExited) {
+		join_on_thread->status = join_on_thread->kZombie;
+		*value_ptr = join_on_thread->return_value;
+		unlock();
+		return 0;
+	}
+
 	sched.front()->join_on_thread_id = thread;
 	sched.front()->status = sched.front()->kBlockedJoin;
 	unlock();
 
 	kill(getpid(), SIGALRM);
+
 	lock();
 	*value_ptr = sched.front()->return_value;
 	sched.front()->return_value = nullptr;

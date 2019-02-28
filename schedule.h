@@ -14,13 +14,15 @@ class Schedule {
 		Schedule();
 		~Schedule();
 		void push(ThreadControlBlock *t, pthread_t *p);
-		void pop();
-		void update_first(); // Move the first element to the back.
 		void schedule_next(); // update_first() until element in front has status kReady.
 		bool check_threads_exited(); // For main thread to exit only after all other threads have exited.
 		ThreadControlBlock *get_join_thread(pthread_t join_on_thread_id);
 		ThreadControlBlock *front();
 	private:
+
+		void pop();
+		void update_first(); // Move the first element to the back.
+
 		struct Node {
 			Node() {
 				value = nullptr;
