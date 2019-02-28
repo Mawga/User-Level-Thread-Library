@@ -66,17 +66,17 @@ void Schedule::schedule_next() {
 		if (thread->status == thread->kReady) {
 			thread->status = thread->kRunning;
 		}
-		else if (thread->status == thread->kExited || thread->status == thread->kWaiting) {
+		else if (thread->status == thread->kZombie || thread->status == thread->kWaiting) {
 			Schedule::update_first();
 		}
 		// It's not necessary to keep zombie thread status.
-		else if (thread->status == thread->kZombie) {
+		else if (thread->status == thread->kExited) {
 			Schedule::pop();
 		}
 		else if (thread->status == thread->kBlockedJoin) {
 			ThreadControlBlock *join_on_thread = get_join_thread(thread->join_on_thread_id);
-			if (join_on_thread->status == join_on_thread->kExited) { // If join on thread has exited thread is no longer blocked.
-				join_on_thread->status = join_on_thread->kZombie;
+			if (join_on_thread->status == join_on_thread->kZombie) { // If join on thread has exited thread is no longer blocked.
+				join_on_thread->status = join_on_thread->kExited;
 				thread->status = thread->kRunning;
 				thread->return_value = join_on_thread->return_value;
 			}

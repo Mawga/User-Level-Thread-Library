@@ -81,8 +81,8 @@ int pthread_join(pthread_t thread, void **value_ptr) {
 		return -1;
 	}
 
-	if (join_on_thread->status == join_on_thread->kExited) {
-		join_on_thread->status = join_on_thread->kZombie;
+	if (join_on_thread->status == join_on_thread->kZombie) {
+		join_on_thread->status = join_on_thread->kExited;
 		*value_ptr = join_on_thread->return_value;
 		unlock();
 		return 0;
@@ -111,7 +111,8 @@ void pthread_exit(void *value_ptr) {
 	lock();
 
 	if (*(sched.front()->thread_id) != 0) {
-		sched.front()->status = sched.front()->kExited;
+		sched.front()->status = sched.front()->kZombie;
+
 		sched.front()->return_value = value_ptr;
 		unlock();
 		kill(getpid(), SIGALRM);
