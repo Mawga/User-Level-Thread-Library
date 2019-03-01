@@ -1,9 +1,11 @@
 # Maga Kim
-11 February 2019
+1 March 2019
 
 This user level thread library implementation uses non-local gotos via jmp_buf, setjmp, longjmp to iterate through threads on a priority schedule, which allocates 50 ms of run time before running the next thread. 
 
 A struct ThreadControlBlock is created to hold information about the threads while a class Schedule manages the ThreadControlBlocks.
+
+Update 3/1/19: Added implementation of pthread_join as well as semaphore support.
 
 Currently there is no thread synchronization which will be implemented shortly.
 ## thread_control_block.cc
@@ -84,7 +86,5 @@ Reviewed the call stack.
 
 Not returning correct values on pthread_self and when printing &thread:
 Changed the ThreadControlBlock's thread_id to a pointer value which uses the pthread_t* input.
-    
-## TODO
-Implement thread synchronization
+
 
