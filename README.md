@@ -1,5 +1,5 @@
 # Maga Kim
-1 March 2019
+24 April 2019
 
 This user level thread library implementation uses non-local gotos via jmp_buf, setjmp, longjmp to iterate through threads on a priority schedule, which allocates 50 ms of run time before running the next thread. 
 
@@ -9,7 +9,6 @@ Update 3/1/19: Added implementation of pthread_join as well as semaphore support
 
 Update 4/24/19: Added information on semaphores and pthread_join
 
-Currently there is no thread synchronization which will be implemented shortly.
 ## thread_control_block.cc
 Implements a struct ThreadControlBlock which holds information about a thread.
 
@@ -124,7 +123,7 @@ Each semaphore has a SemaphoreQueue holding waiting threads.
 		Increment id. If there is a thread waiting at the front of the SemaphoreQueue then change its status to kReady and pop it off.
 
 ## threads.cc
-Unity file includes thread.cc, schedule.cc, and thread_control_block.cc for makefile to create threads.o
+Unity file includes thread.cc, schedule.cc, thread_control_block.cc, semaphore.cc, and semaphore_queue.cc for makefile to create threads.o
 
 ## Issues that I ran into
 Not having a clear understanding of jmp_buf and set_jmp:
